@@ -8,30 +8,219 @@
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/fontawesome/css/all.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 </head>
 <body>
-        <div class="container mt-5">
-                <div class="row justify-content-center">
-                        <div class="col-md-6">
+        <div class="container-fluid">
+                <div class="container mt-5">
+                        <div class="row justify-content-center">
                                 <h1 class="text-center mb-4">QR Code Generator</h1>
+                                <div class="col-md-6">
                                         <div class="mb-3">
                                                 <label for="text" class="form-label">Enter text to generate QR code:</label>
                                                 <input type="text" class="form-control" id="inp_text" placeholder="Enter text">
                                         </div>
                                         <button type="button" class="btn btn-primary w-100" onclick="encode()">Generate QR Code</button>
+                                </div>
+                        </div>
+                
+                        <!-- Add a separator div with dashed line, fade, and "or" text -->
+                        <div class="separator">
+                                <hr style="border: 1px dashed #ccc; opacity: 0.5;">
+                                <span class="or-text">or</span>
+                        </div>
+                        <div id="reader" style="display: none;"></div>
+                        <div class="row">
+                                <h1 class="text-center mb-4">QR Code Scanner</h1>
+                
+                                <div class="col-md-6">
+                                        <div class="card">
+                                                <div class="card-body">
+                                                        <h5 class="card-title">File Input</h5>
+                                                        <div class="form-group">
+                                                                <div class="input-group">
+                                                                    <input class="form-control" type="file" id="imageInput" accept="image/*">
+                                                                    <button class="btn btn-secondary" type="button" id="clearBtn" disabled>Clear</button>
+                                                                </div>
+                                                                <label for="imageInput" class="form-label mt-2">Choose File</label>
+                                                                <small class="text-muted">Only image file allowed to upload here.</small>
+                                                            </div>
+                                                        <button type="button" class="btn btn-primary mt-3" id="uploadBtn">Upload</button>
+                                                </div>
+                                        </div>
+                                </div>
+                                <div class="col-md-6">
+                                        <div class="card">
+                                                <div class="card-body" id="imagePreview" style="height: 200px; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center;">
+                                                                        
+                                                        <p class="text-muted">Drop Your Image Here</p>
+ 
+
+                                                </div>
+                                        </div>
+                                </div>
                         </div>
                 </div>
+
+                <hr style="margin-top: 21rem;">
+
+                <footer>
+                        <div class="container">
+                                <p>@2024-2025 <a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" target="_blank" href="https://papayavi.github.io/rapidqr" style="color: inherit;">papaya.github.io/rapidQR</a></p>
+                                <div class="row">
+                                        <div class="col">
+                                                <p ><a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="https://papayavi.github.io/portfolio" target="_blank" style="color: inherit;">My Portfolio</a></p>
+                                        </div>
+                                </div>
+                        </div>
+                        
+                </footer>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
         <script>
+                
+                const imageInput = document.getElementById('imageInput');
+                const imagePreview = document.getElementById('imagePreview');
+                const uploadBtn = document.getElementById('uploadBtn');
+                const clearBtn = document.getElementById('clearBtn');
+                clearBtn.disabled = true;
+                
+                function resetFileInput() {
+                        imageInput.value = '';
+                        imagePreview.innerHTML = '<p class="text-muted">Drop Your Image Here</p>';
+                        clearBtn.disabled = true;
+                }
+
+                clearBtn.addEventListener('click', () => {
+                        imageInput.value = '';
+                        imagePreview.innerHTML = '<p class="text-muted">Drop Your Image Here</p>';
+                        // Disable the clear button after clearing the file input
+                        clearBtn.disabled = true;
+                });
+
+                uploadBtn.addEventListener('click', () => {
+                        if (imageInput.files.length > 0) {
+                        const file = imageInput.files[0];
+                        const qrCodeReader = new Html5Qrcode("reader");
+                        qrCodeReader.scanFile(file, true).then((decodedText) => {
+                                Swal.fire({
+                                        icon: 'success',
+                                        title: 'QR Code Data',
+                                        html: 
+                                        `
+                                        <div class="form-floating">
+                                                <textarea class="form-control" id="floatingTextarea" readonly>${decodedText}</textarea>
+                                                <label for="floatingTextarea">Data</label>
+                                        </div>
+                                        `,
+                                        showCloseButton: true,
+                                        allowOutsideClick: false // Add this option
+                                }).then( () => {
+                                        resetFileInput()
+                                });
+                        })
+                        .catch((error) => {
+                                Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Failed to decode QR code.'
+                                });
+                        });
+                        } else {
+                                Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Please choose a file first.'
+                                });
+                        }
+                });
+
+                imageInput.addEventListener('change', (event) => {
+                        const file = event.target.files[0];
+                        if (file) {
+                                clearBtn.disabled = false;
+                                const reader = new FileReader();
+
+                                reader.onload = (e) => {
+                                        imagePreview.innerHTML = `<img src="${e.target.result}" style="max-width: 100%; max-height: 100%;" alt="Uploaded Image">`;
+                                };
+                                reader.readAsDataURL(file);
+                        } else {
+                                clearBtn.disabled = true;
+                                imagePreview.innerHTML = '<p class="text-muted">Drop Your Image Here</p>';
+                        }
+                });
+
+                imagePreview.addEventListener('dragover', (event) => {
+                        event.preventDefault();
+                        imagePreview.classList.add('dragover');
+                });
+
+                imagePreview.addEventListener('dragleave', () => {
+                        imagePreview.classList.remove('dragover');
+                });
+
+                imagePreview.addEventListener('drop', (event) => {
+                        event.preventDefault();
+                        imagePreview.classList.remove('dragover');
+
+                        const file = event.dataTransfer.files[0];
+                        const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
+                        if (file) {
+                                const fileType = file.type;
+                                if (fileType.startsWith('image/') && validImageTypes.includes(fileType)) {
+                                        const reader = new FileReader();
+
+                                        reader.onload = (e) => {
+                                                imagePreview.innerHTML = `<img src="${e.target.result}" style="max-width: 100%; max-height: 100%;" alt="Uploaded Image">`;
+                                        };
+                                        reader.readAsDataURL(file);
+
+                                        // Update the file input text to show the uploaded file name
+                                        imageInput.files = event.dataTransfer.files;
+                                        const fileName = file.name;
+                                        imageInput.nextElementSibling.textContent = fileName;
+
+                                        // Enable the clear button when a file is dropped
+                                        clearBtn.disabled = false;
+                                        clearBtn.textContent = 'Clear'; // Update the clear button text
+                                } else {
+                                        Swal.fire({
+                                                icon: 'error',
+                                                title: 'Invalid File Type',
+                                                text: 'Only image files are allowed.',
+                                                footer: 'Please try again with a valid image file.',
+                                                allowOutsideClick: false // Add this option
+                                        }).then( () => {
+                                                resetFileInput()
+                                        });
+
+                                        // Also, clear the uploaded file when a non-image file is dropped
+                                        imageInput.value = '';
+                                        imagePreview.innerHTML = '<p class="text-muted">Drop Your Image Here</p>';
+                                        clearBtn.disabled = true;
+                                }
+                        } else {
+                                imagePreview.innerHTML = '<p class="text-muted">Drop Your Image Here</p>';
+                        }
+                });
+                
                 function encode(){
                         var inp_text = $("#inp_text").val();
-                        axios.get('/qr?text='+inp_text).then(function (response) {
+                        if(!inp_text){
+                                Swal.fire({
+                                        icon: "error",
+                                        title: "Oops...",
+                                        text: "Try typing something!",
+                                });
+                        }else{
+                                axios.get('/qr?text='+inp_text).then(function (response) {
                                 $("#inp_text").toggleClass("is-invalid",false) 
-                                console.log(response.data)
                                 Swal.fire({
                                         title: 
                                         `
@@ -56,7 +245,7 @@
                                         confirmButtonText: 
                                         `
                                         <i class="fa fa-thumbs-up"></i> Great!
-                                        `,
+                                        `
                                 });
                                 
                         }).catch(function (error){
@@ -67,12 +256,8 @@
                                         footer: '<a href="#">Why do I have this issue?</a>'
                                 });
                         });
+                        }
                 }
         </script>
 </body>
 </html>
-
-
-
-
-
