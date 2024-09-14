@@ -60,13 +60,39 @@
                                         </div>
                                 </div>
                         </div>
+                        <div class="mt-3" id="bitlyinstructions"></div>
+                                <div class="row lead">
+                                        <div class="col">
+                                                <strong><u>Instructions</u></strong>
+                                                <br>
+                                                <p>
+                                                        <ul class="list-group list-group-ordered">
+                                                                <li class="list-group-item">1. Click "Choose file" and select a QR code image file. Click upload.</li>
+                                                                <li class="list-group-item">2. Wait for the QR code to be scanned and decoded.</li>
+                                                                <li class="list-group-item">3. Review the decoded data in the popup.</li>
+                                                        </ul>
+                                                </p>
+                                        </div>
+                                        <div class="col">
+                                                <strong><u>Features</u></strong>
+                                                <br>
+                                                <p class="">
+                                                        <ul class="list-group list-group-flush">
+                                                                <li class="list-group-item">Unlimited use and always free</li>
+                                                                <li class="list-group-item">High-speed QR code generator/decoder</li>
+                                                                <li class="list-group-item">No registration required</li>
+                                                        </ul>
+                                                </p>
+                                        </div>
+                                </div>
+                        </div>
                 </div>
 
-                <hr style="margin-top: 21rem;">
+                <hr style="margin-top: 8rem;">
 
                 <footer>
                         <div class="container">
-                                <p>@2024-2025 <a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" target="_blank" href="https://github.com/PapayaVi/RapidQR" style="color: inherit;">PapayaVi/RapidQR</a></p>
+                                <p>@<a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" target="_blank" href="https://github.com/PapayaVi/RapidQR" style="color: inherit;">PapayaVi/RapidQR</a></p>
                                 <div class="row">
                                         <div class="col">
                                                 <p ><a class="link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="https://papayavi.github.io/portfolio" target="_blank" style="color: inherit;">My Portfolio</a></p>
@@ -89,6 +115,12 @@
                 const uploadBtn = document.getElementById('uploadBtn');
                 const clearBtn = document.getElementById('clearBtn');
                 clearBtn.disabled = true;
+
+                function copyToClipboard() {
+                        const textarea = document.getElementById("resdata");
+                        textarea.select();
+                        document.execCommand("copy");
+                }
                 
                 function resetFileInput() {
                         imageInput.value = '';
@@ -114,13 +146,19 @@
                                         html: 
                                         `
                                         <div class="form-floating">
-                                                <textarea class="form-control" id="floatingTextarea" readonly>${decodedText}</textarea>
-                                                <label for="floatingTextarea">Data</label>
+                                                <textarea class="form-control" id="resdata" readonly>${decodedText}</textarea>
+                                                <label for="resdata">Data</label>
                                         </div>
                                         `,
                                         showCloseButton: true,
-                                        allowOutsideClick: false // Add this option
+                                        allowOutsideClick: false,
+                                        focusConfirm: false,
+                                        confirmButtonText: 
+                                        `
+                                        <i class="fa fa-thumbs-up"></i> Copy to clipboard
+                                        `
                                 }).then( () => {
+                                        copyToClipboard()
                                         resetFileInput()
                                 });
                         })
